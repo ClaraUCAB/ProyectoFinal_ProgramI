@@ -15,7 +15,7 @@ def inventario_default():
     return [
         # Código    Nombre                  Precio      Cantidad
         ["abc123",  "Poción",               "76z",      10],
-        ["def456",  "Dash Juice",           "1028z",    20],
+        ["def456",  "Dash juice",           "1028z",    20],
         ["ghi789",  "Piedra de afilar",     "80z",      50],
         ["jkl012",  "Gema Wyvern",          "180000z",  3],
         ["mno345",  "Nargacuga",            "102000z",  5],
@@ -42,7 +42,75 @@ def importar_inventario() -> list[list]:
         return inventario_default()
 
 
-def burbuja(array):
+def obtener_codigo(producto):
+    return producto[0]
+
+
+def editar_codigo(producto, valor):
+    producto[0] = valor
+    return producto
+
+
+def obtener_nombre(producto):
+    return producto[1]
+
+
+def editar_nombre(producto, valor):
+    producto[1] = valor
+    return producto
+
+
+def obtener_precio(producto):
+    return producto[2]
+
+
+def editar_precio(producto, valor):
+    producto[2] = valor
+    return producto
+
+
+def obtener_cantidad(producto):
+    return producto[3]
+    
+
+def editar_cantidad(producto, valor) -> list:
+    producto[3] = valor
+    return producto
+
+
+def busqueda_binaria(array, objetivo):
+    start = 0
+    end = len(array) - 1
+    while start <= end:
+        # Se busca la mitad del segmento
+        center = (start + end) // 2
+
+        # Vemos si encontramos el objetivo
+        if array[center] == objetivo:
+            return center
+
+        # Como está ordenado pregunta si el segmento
+        # superior contiene el objetivo
+        elif array[center] < objetivo:
+            # Selecciona la parte superior
+            start = center + 1
+
+        else:
+            # Selecciona la parte inferior
+            end = center - 1
+
+    # No lo encontramos
+    return -1
+
+
+def busqueda_lineal(array, objetivo):
+    for i in range(len(array)):
+        if array[i] == objetivo:
+            return i
+    return -1
+
+
+def ordenamiento_burbuja(array):
     # Hacemos una copia del arreglo
     array = array[:]
 
@@ -62,7 +130,7 @@ def burbuja(array):
 def ordenar_por_codigo(inventario):
     # Creamos una copia del arreglo
     inventario = inventario[:]
-    return burbuja(inventario)
+    return ordenamiento_burbuja(inventario)
 
 
 def ordenar_por_nombre(inventario):
@@ -70,17 +138,91 @@ def ordenar_por_nombre(inventario):
     inventario = inventario[:]
 
     # Invertimos el código y el nombre ya que
-    # la función de burbuja tomará en cuenta el primer elemento
+    # la función de ordenamiento_burbuja tomará en cuenta el primer elemento
     for i in inventario:
         i[0], i[1] = i[1], i[0]
 
-    inventario = burbuja(inventario)
+    inventario = ordenamiento_burbuja(inventario)
 
     # Los invertimos de vuelta
     for i in inventario:
         i[0], i[1] = i[1], i[0]
 
     return inventario
+
+
+def buscar_por_codigo(inventario, codigo):
+    return busqueda_lineal([i[0] for i in inventario], codigo)
+
+
+def buscar_por_nombre(inventario, nombre):
+    return busqueda_lineal([i[1] for i in inventario], nombre)
+
+
+def buscar_producto(inventario, termino):
+    index = buscar_por_codigo(inventario, termino)
+
+    if index != -1:
+        return index
+
+    return buscar_por_nombre(inventario, termino)
+
+
+def crear_producto(inventario):
+    print("Para crear el producto, por favor, ingrese los siguientes datos:")
+
+    # El código no se puede repetir
+    while True:
+        codigo = input("Código: ")
+
+        if buscar_por_codigo(inventario, codigo) != -1:
+            clear()
+            print("[!] Un producto con ese código ya existe. Por favor, escoja un código distinto.\n")
+            print("Para crear el producto, por favor, ingrese los siguientes datos:")
+            continue
+
+        break
+
+    # El nombre tampoco se puede repetir
+    while True:
+        nombre = input("Nombre: ")
+
+        if buscar_por_nombre(inventario, nombre) != -1:
+            clear()
+            print("[!] Un producto con ese nombre ya existe. Por favor, escoja un nombre distinto.\n")
+            print("Para crear el producto, por favor, ingrese los siguientes datos:")
+            continue
+
+        break
+
+    precio = input("Precio de venta: ") + "z"
+    cantidad = int(input("Cantidad: "))
+
+    return [codigo, nombre, precio, cantidad]
+
+
+def menu():
+    while True:
+        print("=== Menú ===")
+        print("[0] Mostrar inventario")
+        print("[1] Buscar producto")
+        print("[2] Ingresar producto")
+        print("[3] Egresar producto")
+        print("[4] Guardar cambios")
+        print("[5] Salir")
+
+        opcion = input("> ")
+
+        # Verificamos que la opción sea válida
+        if not opcion.isdigit() or not 0 <= int(opcion) <= 5:
+            clear()
+            print(f"[!] '{opcion}' es una opción inválida. Por favor, intente de nuevo.\n")
+            continue
+        opcion = int(opcion)
+        
+        # La opción es válida
+        clear()
+        return opcion
 
 
 def mostrar_inventario(inventario):
@@ -131,7 +273,7 @@ def mostrar_inventario(inventario):
             case 0:
                 # Revisamos si no hemos ya previamente ordenado
                 if not ordenado_por_codigo:
-                    inventario_ordenado_codigo = burbuja(inventario)
+                    inventario_ordenado_codigo = ordenamiento_burbuja(inventario)
                     ordenado_por_codigo = True
 
                 inventario = inventario_ordenado_codigo
@@ -152,185 +294,86 @@ def mostrar_inventario(inventario):
                 return
 
 
-# Esta función devuelve True si el programa debería
-# terminar o False si debería continuar ejecución
-def salir(inventario, cambios):
-    # Verificamos si hay cambios sin guardar
-    if not cambios:
-        # No hay ningún cambio que guardar.
-        # Salimos sin problema
-        return True
+def buscar(inventario):
+    termino = input("Ingrese el código o nombre del producto a buscar: ")
+    cambios = False
 
+    # Buscamos a ver si este producto existe
+    index = buscar_producto(inventario, termino)
+
+    if index == -1:
+        # El producto no existe
+        print("El producto que usted a ingresado no existe.")
+        input("Presione ENTER para continuar...")
+        return cambios
+
+    producto = inventario[index]
+    codigo = obtener_codigo(producto)
+    nombre = obtener_nombre(producto)
+    precio = obtener_precio(producto)
+    cantidad = obtener_cantidad(producto)
+
+    clear()
     while True:
-        print("¡Atención! Usted tiene cambios sin guardar.\n")
-        print("[0] Guardar y salir")
-        print("[1] Salir sin guardar")
-        print("[2] Regresar al menú")
+        print("= Datos del producto =")
+        print(f"Código: {codigo}")
+        print(f"Nombre: {nombre}")
+        print(f"Precio de venta: {precio}")
+        print(f"Cantidad: {cantidad}")
 
+        print("\n¿Desea actualizar alguno de estos datos?")
+        print("[0] Código")
+        print("[1] Nombre")
+        print("[2] Precio de venta")
+        print("[3] Cantidad")
+        print("[4] Regresar al menú")
         opcion = input("> ")
 
-        # Verificamos que la opción sea válida
-        if not opcion.isdigit() or not 0 <= int(opcion) <= 2:
+        # Verificamos que la opcion es válida
+        if not opcion.isdigit() or not 0 <= int(opcion) <= 4:
             clear()
             print(f"[!] '{opcion}' es una opción inválida. Por favor, intente de nuevo.\n")
             continue
         opcion = int(opcion)
 
-        if opcion == 0:
-            # Guardamos y luego salimos sin problema
-            guardar_binario("inventario.bin", inventario)
-            print("\n[+] Cambios guardados exitosamente.")
-            return True
+        print()
 
-        if opcion == 1:
-            # El usuario quiere salir sin guardar.
-            # Salimos sin problema
-            return True
+        match opcion:
+            # Modificar código
+            case 0:
+                print(f"Código actual: {codigo}")
+                codigo = input("Ingrese un nuevo código: ")
+                inventario[index] = editar_codigo(producto, codigo)
+                clear()
+                cambios = True
 
-        # Regresamos al menú
-        return False
+            # Modificar nombre
+            case 1:
+                print(f"Nombre actual: {nombre}")
+                nombre = input("Ingrese un nuevo nombre: ")
+                inventario[index] = editar_nombre(producto, nombre)
+                clear()
+                cambios = True
 
+            # Modificar precio de venta
+            case 2:
+                print(f"Precio actual: {precio}")
+                precio = input("Ingrese un nuevo precio: ") + "z"
+                inventario[index] = editar_precio(producto, precio)
+                clear()
+                cambios = True
 
-def busqueda_binaria(array, objetivo):
-    start = 0
-    end = len(array) - 1
-    while start <= end:
-        # Se busca la mitad del segmento
-        center = (start + end) // 2
+            # Modificar cantidad
+            case 3:
+                print(f"Cantidad actual: {cantidad}")
+                cantidad = int(input("Ingrese una nueva cantidad: "))
+                inventario[index] = editar_cantidad(producto, cantidad)
+                clear()
+                cambios = True
 
-        # Vemos si encontramos el objetivo
-        if array[center] == objetivo:
-            return center
-
-        # Como está ordenado pregunta si el segmento
-        # superior contiene el objetivo
-        elif array[center] < objetivo:
-            # Selecciona la parte superior
-            start = center + 1
-
-        else:
-            # Selecciona la parte inferior
-            end = center - 1
-
-    # No lo encontramos
-    return -1
-
-
-def busqueda_lineal(array, objetivo):
-    for i in range(len(array)):
-        if array[i] == objetivo:
-            return i
-    return -1
-
-
-def buscar_por_codigo(inventario, codigo):
-    return busqueda_lineal([i[0] for i in inventario], codigo)
-
-
-def buscar_por_nombre(inventario, nombre):
-    return busqueda_lineal([i[1] for i in inventario], nombre)
-
-
-def buscar_producto(inventario, termino):
-    index = buscar_por_codigo(inventario, termino)
-
-    if index != -1:
-        return index
-
-    return buscar_por_nombre(inventario, termino)
-
-
-
-
-def obtener_codigo(producto):
-    return producto[0]
-
-def editar_codigo(producto, valor):
-    producto[0] = valor
-    return producto
-
-
-def obtener_nombre(producto):
-    return producto[1]
-
-
-def editar_nombre(producto, valor):
-    producto[1] = valor
-    return producto
-
-
-def obtener_precio(producto):
-    return producto[2]
-
-
-def editar_precio(producto, valor):
-    producto[2] = valor
-    return producto
-
-def obtener_cantidad(producto):
-    return producto[3]
-    
-
-def editar_cantidad(producto, valor) -> list:
-    producto[3] = valor
-    return producto
-
-
-def menu():
-    while True:
-        print("=== Menú ===")
-        print("[0] Mostrar inventario")
-        print("[1] Buscar producto")
-        print("[2] Ingresar producto")
-        print("[3] Egresar producto")
-        print("[4] Guardar cambios")
-        print("[5] Salir")
-
-        opcion = input("> ")
-
-        # Verificamos que la opción sea válida
-        if not opcion.isdigit() or not 0 <= int(opcion) <= 5:
-            clear()
-            print(f"[!] '{opcion}' es una opción inválida. Por favor, intente de nuevo.\n")
-            continue
-        opcion = int(opcion)
-        
-        # La opción es válida
-        clear()
-        return opcion
-
-
-def crear_producto(inventario):
-    print("Para crear el producto, por favor, ingrese los siguientes datos:")
-
-    # El código no se puede repetir
-    while True:
-        codigo = input("Código: ")
-
-        if buscar_por_codigo(inventario, codigo) != -1:
-            clear()
-            print("[!] Un producto con ese código ya existe. Por favor, escoja un código distinto.\n")
-            print("Para crear el producto, por favor, ingrese los siguientes datos:")
-            continue
-
-        break
-
-    # El nombre tampoco se puede repetir
-    while True:
-        nombre = input("Nombre: ")
-
-        if buscar_por_nombre(inventario, nombre) != -1:
-            clear()
-            print("[!] Un producto con ese nombre ya existe. Por favor, escoja un nombre distinto.\n")
-            print("Para crear el producto, por favor, ingrese los siguientes datos:")
-            continue
-
-        break
-
-    precio = input("Precio de venta: ") + "z"
-    cantidad = int(input("Cantidad: "))
-
-    return [codigo, nombre, precio, cantidad]
+            # Regresar al menú
+            case 4:
+                return cambios
 
 
 def ingresar_producto(inventario):
@@ -432,86 +475,41 @@ def egresar_producto(inventario):
     return inventario, True
 
 
-def buscar(inventario):
-    termino = input("Ingrese el código o nombre del producto a buscar: ")
-    cambios = False
+def salir(inventario, cambios):
+    # Verificamos si hay cambios sin guardar
+    if not cambios:
+        # No hay ningún cambio que guardar.
+        # Salimos sin problema
+        return True
 
-    # Buscamos a ver si este producto existe
-    index = buscar_producto(inventario, termino)
-
-    if index == -1:
-        # El producto no existe
-        print("El producto que usted a ingresado no existe.")
-        input("Presione ENTER para continuar...")
-        return cambios
-
-    producto = inventario[index]
-    codigo = obtener_codigo(producto)
-    nombre = obtener_nombre(producto)
-    precio = obtener_precio(producto)
-    cantidad = obtener_cantidad(producto)
-
-    clear()
     while True:
-        print("= Datos del producto =")
-        print(f"Código: {codigo}")
-        print(f"Nombre: {nombre}")
-        print(f"Precio de venta: {precio}")
-        print(f"Cantidad: {cantidad}")
+        print("¡Atención! Usted tiene cambios sin guardar.\n")
+        print("[0] Guardar y salir")
+        print("[1] Salir sin guardar")
+        print("[2] Regresar al menú")
 
-        print("\n¿Desea actualizar alguno de estos datos?")
-        print("[0] Código")
-        print("[1] Nombre")
-        print("[2] Precio de venta")
-        print("[3] Cantidad")
-        print("[4] Regresar al menú")
         opcion = input("> ")
 
-        # Verificamos que la opcion es válida
-        if not opcion.isdigit() or not 0 <= int(opcion) <= 4:
+        # Verificamos que la opción sea válida
+        if not opcion.isdigit() or not 0 <= int(opcion) <= 2:
             clear()
             print(f"[!] '{opcion}' es una opción inválida. Por favor, intente de nuevo.\n")
             continue
         opcion = int(opcion)
 
-        print()
+        if opcion == 0:
+            # Guardamos y luego salimos sin problema
+            guardar_binario("inventario.bin", inventario)
+            print("\n[+] Cambios guardados exitosamente.")
+            return True
 
-        match opcion:
-            # Modificar código
-            case 0:
-                print(f"Código actual: {codigo}")
-                codigo = input("Ingrese un nuevo código: ")
-                inventario[index] = editar_codigo(producto, codigo)
-                clear()
-                cambios = True
+        if opcion == 1:
+            # El usuario quiere salir sin guardar.
+            # Salimos sin problema
+            return True
 
-            # Modificar nombre
-            case 1:
-                print(f"Nombre actual: {nombre}")
-                nombre = input("Ingrese un nuevo nombre: ")
-                inventario[index] = editar_nombre(producto, nombre)
-                clear()
-                cambios = True
-
-            # Modificar precio de venta
-            case 2:
-                print(f"Precio actual: {precio}")
-                precio = input("Ingrese un nuevo precio: ") + "z"
-                inventario[index] = editar_precio(producto, precio)
-                clear()
-                cambios = True
-
-            # Modificar cantidad
-            case 3:
-                print(f"Cantidad actual: {cantidad}")
-                cantidad = int(input("Ingrese una nueva cantidad: "))
-                inventario[index] = editar_cantidad(producto, cantidad)
-                clear()
-                cambios = True
-
-            # Regresar al menú
-            case 4:
-                return cambios
+        # Regresamos al menú
+        return False
 
 
 def main():
