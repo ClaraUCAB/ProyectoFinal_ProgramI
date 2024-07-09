@@ -1,4 +1,3 @@
-from enum import Enum
 import pickle
 import sys
 import os
