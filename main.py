@@ -14,10 +14,10 @@ def clear():
 def inventario_default():
     return [
         # Código    Nombre          Precio      Cantidad
-        ["000aaa",  "Nargacuga",    28_000,     5],
-        ["111bbb",  "Zinogre",      32_000,     5],
-        ["222ccc",  "Dodogama",     18_000,     5],
-        ["333ddd",  "Safi'jiva",    140_000,    1],
+        ["abc123",  "Nargacuga",    28_000,     5],
+        ["def456",  "Zinogre",      32_000,     5],
+        ["ghi789",  "Dodogama",     18_000,     5],
+        ["jkl012",  "Safi'jiva",    140_000,    1],
     ]
 
 
@@ -194,30 +194,40 @@ def busqueda_binaria(array, objetivo):
     start = 0
     end = len(array) - 1
     while start <= end:
-        # se busca la mitad del segmento
+        # Se busca la mitad del segmento
         center = (start + end) // 2
+
+        # Vemos si encontramos el objetivo
         if array[center] == objetivo:
-            # si lo encuentra lo devuelve
             return center
-        # como está ordenado pregunta si el segmento
+
+        # Como está ordenado pregunta si el segmento
         # superior contiene el objetivo
         elif array[center] < objetivo:
-            # selecciona la parte superior
+            # Selecciona la parte superior
             start = center + 1
+
         else:
-            # de lo contarrio, selecciona la parte inferior
+            # Selecciona la parte inferior
             end = center - 1
-            # se ejecuta hasta que lo consiga
+
+    # No lo encontramos
     return -1
 
 
+def busqueda_lineal(array, objetivo):
+    for i in range(len(array)):
+        if array[i] == objetivo:
+            return i
+    return -1
+
 
 def buscar_por_codigo(inventario, codigo):
-    return busqueda_binaria([i[0] for i in inventario], codigo)
+    return busqueda_lineal([i[0] for i in inventario], codigo)
 
 
 def buscar_por_nombre(inventario, nombre):
-    return busqueda_binaria([i[1] for i in inventario], nombre)
+    return busqueda_lineal([i[1] for i in inventario], nombre)
 
 
 def buscar_producto(inventario, termino):
@@ -513,7 +523,6 @@ def main():
             # Mostrar inventario
             case 0:
                 mostrar_inventario(inventario)
-                input("\nPresione ENTER para continuar...")
                 clear()
 
             # Buscar producto
