@@ -13,11 +13,12 @@ def clear():
 
 def inventario_default():
     return [
-        # Código    Nombre          Precio      Cantidad
-        ["abc123",  "Nargacuga",    28_000,     5],
-        ["def456",  "Zinogre",      32_000,     5],
-        ["ghi789",  "Dodogama",     18_000,     5],
-        ["jkl012",  "Safi'jiva",    140_000,    1],
+        # Código    Nombre                  Precio      Cantidad
+        ["abc123",  "Poción",               "76z",      10],
+        ["def456",  "Dash Juice",           "1028z",    20],
+        ["ghi789",  "Piedra de afilar",     "80z",      50],
+        ["jkl012",  "Gema Wyvern",          "180000z",  3],
+        ["mno345",  "Nargacuga",            "102000z",  5],
     ]
 
 
@@ -115,7 +116,7 @@ def mostrar_inventario(inventario):
         print()
         print("[0] Ordenar por código")
         print("[1] Ordenar por nombre")
-        print("[2] Regresar al menu")
+        print("[2] Regresar al menú")
         opcion = input("> ")
 
         # Verificamos que la opcion es valida
@@ -146,7 +147,7 @@ def mostrar_inventario(inventario):
                 inventario = inventario_ordenado_nombre
                 clear()
 
-            # Regresar al menu
+            # Regresar al menú
             case 2:
                 return
 
@@ -162,9 +163,9 @@ def salir(inventario, cambios):
 
     while True:
         print("¡Atención! Usted tiene cambios sin guardar.\n")
-        print("[0] Salir sin guardar")
-        print("[1] Guardar y salir")
-        print("[2] Regresar al menu")
+        print("[0] Guardar y salir")
+        print("[1] Salir sin guardar")
+        print("[2] Regresar al menú")
 
         opcion = input("> ")
 
@@ -176,17 +177,17 @@ def salir(inventario, cambios):
         opcion = int(opcion)
 
         if opcion == 0:
-            # El usuario quiere salir sin guardar.
-            # Salimos sin problema
-            return True
-
-        if opcion == 1:
             # Guardamos y luego salimos sin problema
             guardar_binario("inventario.bin", inventario)
             print("\n[+] Cambios guardados exitosamente.")
             return True
 
-        # Regresamos al menu
+        if opcion == 1:
+            # El usuario quiere salir sin guardar.
+            # Salimos sin problema
+            return True
+
+        # Regresamos al menú
         return False
 
 
@@ -326,7 +327,7 @@ def crear_producto(inventario):
 
         break
 
-    precio = int(input("Precio de venta: "))
+    precio = input("Precio de venta: ") + "z"
     cantidad = int(input("Cantidad: "))
 
     return [codigo, nombre, precio, cantidad]
@@ -414,7 +415,7 @@ def egresar_producto(inventario):
 
             if respuesta == "n":
                 # El usuario no desea egresar nada
-                # Regresamos al menu
+                # Regresamos al menú
                 return inventario, False
             
             # Le quitamos lo máximo posible
@@ -463,7 +464,7 @@ def buscar(inventario):
         print("[1] Nombre")
         print("[2] Precio de venta")
         print("[3] Cantidad")
-        print("[4] Regresar al menu")
+        print("[4] Regresar al menú")
         opcion = input("> ")
 
         # Verificamos que la opcion es válida
@@ -495,7 +496,7 @@ def buscar(inventario):
             # Modificar precio de venta
             case 2:
                 print(f"Precio actual: {precio}")
-                precio = int(input("Ingrese un nuevo precio: "))
+                precio = input("Ingrese un nuevo precio: ") + "z"
                 inventario[index] = editar_precio(producto, precio)
                 clear()
                 cambios = True
@@ -508,7 +509,7 @@ def buscar(inventario):
                 clear()
                 cambios = True
 
-            # Regresar al menu
+            # Regresar al menú
             case 4:
                 return cambios
 
